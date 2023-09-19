@@ -1,0 +1,94 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "mysql"
+  url      = env("PRISMA_DB_URL")
+}
+
+model categories {
+  id               String       @id @db.VarChar(255)
+  name             String       @db.Text
+  parent           String?      @db.VarChar(255)
+  categories       categories?  @relation("categoriesTocategories", fields: [parent], references: [id], onDelete: Cascade, map: "categories_ibfk_1")
+  other_categories categories[] @relation("categoriesTocategories")
+  products         products[]
+
+  @@index([parent], map: "parent")
+}
+
+model descriptiontemplates {
+  id   String @id @db.VarChar(255)
+  text String @db.Text
+  name String @db.Text
+}
+
+model orderedproducts {
+  productId String   @db.VarChar(255)
+  orderId   String   @unique(map: "orderId") @db.VarChar(255)
+  amount    Int
+  products  products @relation(fields: [productId], references: [id], onDelete: Cascade, map: "orderedproducts_ibfk_1")
+  orders    orders   @relation(fields: [orderId], references: [id], onDelete: Cascade, map: "orderedproducts_ibfk_2")
+
+  @@id([productId, orderId])
+}
+
+model orders {
+  id              String           @unique(map: "id") @db.VarChar(255)
+  userInfoId      String           @db.VarChar(255)
+  overallPrice    Int
+  orderedproducts orderedproducts?
+  userinfo        userinfo         @relation(fields: [userInfoId], references: [id], onDelete: Cascade, map: "orders_ibfk_1")
+
+  @@id([id, userInfoId])
+  @@index([userInfoId], map: "userInfoId")
+}
+
+model products {
+  id              String            @id @db.VarChar(255)
+  name            String            @db.Text
+  price           String            @db.Text
+  description     String            @db.Text
+  categoryId      String?           @db.VarChar(255)
+  orderedproducts orderedproducts[]
+  categories      categories?       @relation(fields: [categoryId], references: [id], map: "products_ibfk_1")
+  productsphotos  productsphotos[]
+
+  @@index([categoryId], map: "categoryId")
+}
+
+model productsphotos {
+  id        String   @id @db.VarChar(255)
+  url       String   @db.Text
+  productId String   @db.VarChar(255)
+  products  products @relation(fields: [productId], references: [id], onDelete: Cascade, map: "productsphotos_ibfk_1")
+
+  @@index([productId], map: "productId")
+}
+
+model userinfo {
+  id              String   @id @db.VarChar(255)
+  firstName       String   @db.Text
+  lastName        String   @db.Text
+  phone           String   @db.Text
+  email           String   @db.Text
+  street          String   @db.Text
+  referenceNumber String   @db.Text
+  city            String   @db.Text
+  postCode        String   @db.Text
+  birthday        DateTime @db.Date
+  orders          orders[]
+  users           users    @relation(fields: [id], references: [userInfoId], onDelete: NoAction, map: "userinfo_ibfk_1")
+}
+
+model users {
+  id         String    @id @db.VarChar(255)
+  admin      Boolean
+  userInfoId String    @unique(map: "userInfoId_2") @db.VarChar(255)
+  username   String    @db.Text
+  password   String    @db.Text
+  userinfo   userinfo?
+
+  @@index([userInfoId], map: "userInfoId")
+}
