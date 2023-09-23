@@ -46,23 +46,26 @@ model orders {
 }
 
 model products {
-  id              String            @id @db.VarChar(255)
-  name            String            @db.Text
-  price           String            @db.Text
-  description     String            @db.Text
-  categoryId      String?           @db.VarChar(255)
-  orderedproducts orderedproducts[]
-  categories      categories?       @relation(fields: [categoryId], references: [id], map: "products_ibfk_1")
-  productsphotos  productsphotos[]
+  id                                         String            @id @db.VarChar(255)
+  name                                       String            @db.Text
+  price                                      Int
+  description                                String            @db.Text
+  categoryId                                 String?           @db.VarChar(255)
+  previewPhoto                               String?           @unique(map: "previewPhoto") @db.VarChar(255)
+  orderedproducts                            orderedproducts[]
+  categories                                 categories?       @relation(fields: [categoryId], references: [id], map: "products_ibfk_1")
+  productsphotos                             productsphotos[]
+  productsphotos_productsphotos_idToproducts productsphotos?   @relation("productsphotos_idToproducts")
 
   @@index([categoryId], map: "categoryId")
 }
 
 model productsphotos {
-  id        String   @id @db.VarChar(255)
-  url       String   @db.Text
-  productId String   @db.VarChar(255)
-  products  products @relation(fields: [productId], references: [id], onDelete: Cascade, map: "productsphotos_ibfk_1")
+  id                                   String   @id @db.VarChar(255)
+  url                                  String   @db.Text
+  productId                            String   @db.VarChar(255)
+  products                             products @relation(fields: [productId], references: [id], onDelete: Cascade, map: "productsphotos_ibfk_1")
+  products_productsphotos_idToproducts products @relation("productsphotos_idToproducts", fields: [id], references: [previewPhoto], onDelete: Cascade, map: "productsphotos_ibfk_2")
 
   @@index([productId], map: "productId")
 }

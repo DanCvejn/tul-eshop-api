@@ -5,3 +5,7 @@ export const orderIdGenerator = async () => {
   const code = await generateToken({ characterSet: ["number"], length: 4 });
   return `${year}${code}`;
 }
+
+export const createId = async () => {
+  return await generateToken({ length: 6 });
+}
